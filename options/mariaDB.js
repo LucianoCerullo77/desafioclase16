@@ -8,3 +8,4 @@ const optionsMDB = {
         database: 'ecommerce'
     }
 }
+module.exports = {optionsMDB}

@@ -1,5 +1,4 @@
 const knex = require('knex')
-
 class Productos {
     constructor(config, table){
         this.knex = knex(config)

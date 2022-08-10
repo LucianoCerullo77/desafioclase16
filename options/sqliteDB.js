@@ -5,3 +5,4 @@
     },
     useNullAsDefault: true
 }
+module.exports = {optionSQLite};
