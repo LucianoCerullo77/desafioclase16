@@ -1,12 +1,11 @@
-import knexLib from 'knex'
-
+const knex = require('knex')
 
 class Productos {
     constructor(config, table){
-        this.knex = knexLib(config)
+        this.knex = knex(config)
         this.table = table
     }
-    
+
     create(product){
         const producto = { id: 0, ...product}
         return this.knex.insert(producto).into(this.table).then()

@@ -1,20 +1,17 @@
-import knexLib from 'knex'
+const knex = require('knex')
 
 class Mensajes{
     constructor(config, table){
-        //this.archivo = archivo
-        //this.productos = JSON.parse(fs.readFileSync(this.archivo,'utf-8'))
-        this.knex = knexLib(config)
+        this.knex = knex(config)
         this.table = table
     }
 
-    insertarMensaje(mensaje){
-        const msg = mensaje
-        //console.log(producto)
-        return this.knex.insert(msg).into(this.table).then()
+    insertMessage(mensaje){
+        const message = mensaje
+        return this.knex.insert(message).into(this.table).then()
     }
 
-    listarMensajes(){
+    listMessage(){
         return this.knex.select('*').table(this.table)  
     }
 

@@ -1,7 +1,6 @@
 let socket = io.connect()
 
 socket.on('productos', function(data){
-    console.log("here")
     renderProductos(data)
 })
 
@@ -10,7 +9,7 @@ function renderProductos(data){
         return(`<tr>
                     <td class="fw-normal mb-1">${product.title}</td>
                     <td class="fw-normal mb-1">${product.price}</td>
-                    <td><img src=${product.foto_url} style="width: 45px; height: 45px"></td>
+                    <td><img src=${product.foto_url} style="width: 50px; height: 50px"></td>
                 </tr>`)
     }).join('')
     document.getElementById('table_products').innerHTML=html
@@ -18,7 +17,6 @@ function renderProductos(data){
 }
 
 function addProduct(){
-    console.log("here")
     let product = {
         title: document.getElementById('title').value, 
         price: document.getElementById('price').value,
@@ -38,7 +36,9 @@ socket.on('mensajes', function(data){
 
 function renderMensajes(data){
     let html = data.map(function(mensaje, index){
-        return(`<span style="color: blue; font-weight: bold;">${mensaje.autor}</span> <span style="color: brown;">${mensaje.fecha}</span>: <span style="color: green; font-style: italic;">${mensaje.mensaje}</span> <br>`)
+        return(`<span style="color: #346beb; font-weight: bold;">${mensaje.autor}</span> 
+        <span style="color: #a36f0f;">${mensaje.fecha}</span>
+        :<span style="color: #0d912c; font-style: italic;">${mensaje.mensaje}</span> <br>`)
     }).join('')
     document.getElementById('mensajes').innerHTML=html
 
