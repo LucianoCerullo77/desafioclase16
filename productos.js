@@ -1,4 +1,5 @@
-const knex = require('knex')
+const options = require('./options/sqliteDB')
+const knex = require('knex')(options)
 class Productos {
     constructor(config, table){
         this.knex = knex(config)
@@ -24,4 +25,4 @@ class Productos {
 
 }
 
-export default Productos
+module.exports = Productos

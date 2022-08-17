@@ -17,4 +17,4 @@ class Mensajes{
 
 }
 
-export default Mensajes
+module.exports = Mensajes;
