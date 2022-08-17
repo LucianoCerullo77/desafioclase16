@@ -5,8 +5,8 @@ const io = require('socket.io')(server)
 const fs = require('fs')
 const {optionSQLite} = require('./options/sqliteDB')
 const {optionsMDB} = require('./options/mariaDB')
-const Productos = require('./productos')
-const Mensajes = require('./mensajes')
+const Productos = require('./productos.js')
+const Mensajes = require('./mensajes.js')
 
 app.use(express.static('public'));
 
