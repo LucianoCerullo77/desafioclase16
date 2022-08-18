@@ -23,6 +23,19 @@ io.on('connection', function(socket){
         productos.create(data)
         io.sockets.emit('productos', productosDB)
     })
+
+    socket.on('table', function(data){
+        productos.createTable()
+
+        productos.getAll().then(productos => {
+            productosDB = productos
+            io.sockets.emit('productos', productosDB)
+        }).catch(err => {
+            console.log(err)
+        }
+        )
+    }),
+
     socket.emit('mensajes', mensajesDB)
     socket.on('newMensaje', function(data){
         mensajesDB.push(data)

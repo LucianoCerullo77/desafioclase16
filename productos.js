@@ -1,9 +1,34 @@
-const options = require('./options/sqliteDB')
-const knex = require('knex')(options)
+
 class Productos {
-    constructor(config, table){
-        this.knex = knex(config)
+    constructor(opcion, table){
+        this.knex = require("knex")(opcion)
         this.table = table
+    }
+
+    createTable() {
+        if (this.knex.schema.hasTable(this.table)) {
+            console.log('La tabla ya existe')
+        } else {
+            this.knex.schema.createTable(this.table, (table) => {
+                if (this.table === 'productos') {
+                    table.increments('id')
+                    table.string('nombre')
+                    table.string('descripcion')
+                    table.string('precio')
+                    table.string('imagen')
+                } else {
+                    table.increments('id')
+                    table.string('nombre')
+                    table.string('mensaje')
+                }
+            })
+            .then (() => {
+                console.log('Tabla creada')
+            })
+            .catch(err => {
+                console.log(err)
+            })
+        }
     }
 
     create(product){
