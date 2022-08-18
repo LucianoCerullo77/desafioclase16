@@ -26,7 +26,6 @@ io.on('connection', function(socket){
 
     socket.on('table', function(data){
         productos.createTable()
-
         productos.getAll().then(productos => {
             productosDB = productos
             io.sockets.emit('productos', productosDB)
@@ -35,7 +34,7 @@ io.on('connection', function(socket){
         }
         )
     }),
-
+    
     socket.emit('mensajes', mensajesDB)
     socket.on('newMensaje', function(data){
         mensajesDB.push(data)
