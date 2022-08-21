@@ -12,10 +12,10 @@ class Productos {
             this.knex.schema.createTable(this.table, (table) => {
                 if (this.table === 'productos') {
                     table.increments('id')
-                    table.string('nombre')
+                    table.string('tittle')
                     table.string('descripcion')
-                    table.string('precio')
-                    table.string('imagen')
+                    table.number('price')
+                    table.string('foto_url')
                 } else {
                     table.increments('id')
                     table.string('nombre')

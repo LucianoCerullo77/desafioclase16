@@ -7,7 +7,7 @@ socket.on('productos', function(data){
 function renderProductos(data){
     let html = data.map(function(product){
         return(`<tr>
-                    <td class="fw-normal mb-1">${product.title}</td>
+                    <td class="fw-normal mb-1">${product.tittle}</td>
                     <td class="fw-normal mb-1">${product.price}</td>
                     <td><img src=${product.foto_url} style="width: 50px; height: 50px"></td>
                 </tr>`)
@@ -18,12 +18,12 @@ function renderProductos(data){
 
 function addProduct(){
     let product = {
-        title: document.getElementById('title').value, 
+        tittle: document.getElementById('tittle').value, 
         price: document.getElementById('price').value,
         foto_url: document.getElementById('foto_url').value
     }
     socket.emit('newProduct', product)
-    document.getElementById('title').value = ''
+    document.getElementById('tittle').value = ''
     document.getElementById('price').value = ''
     document.getElementById('foto_url').value = ''
     document.getElementById('title').focus()
