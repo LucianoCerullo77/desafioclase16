@@ -3,49 +3,100 @@ class Productos {
     constructor(opcion, table){
         this.knex = require("knex")(opcion)
         this.table = table
+        this.createTable();
     }
 
-    createTable() {
-        if (this.knex.schema.hasTable(this.table)) {
-            console.log('La tabla ya existe')
-        } else {
-            this.knex.schema.createTable(this.table, (table) => {
-                if (this.table === 'productos') {
-                    table.increments('id')
-                    table.string('tittle')
-                    table.string('descripcion')
-                    table.number('price')
-                    table.string('foto_url')
-                } else {
-                    table.increments('id')
-                    table.string('nombre')
-                    table.string('mensaje')
-                }
-            })
-            .then (() => {
-                console.log('Tabla creada')
-            })
-            .catch(err => {
-                console.log(err)
-            })
+    async createTable() {
+        try {
+            if ( await this.knex.schema.hasTable(this.table)) {
+                console.log('La tabla ya existe')
+            } else {
+                await this.knex.schema.createTable(this.table, (table) => {
+                    if (this.table === 'productos') {
+                        table.increments('id')
+                        table.string('tittle')
+                        table.string('descripcion')
+                        table.float('price')
+                        table.string('foto_url')
+                    } else {
+                        table.increments('id')
+                        table.string('nombre')
+                        table.string('mensaje')
+                    }       
+                })
+                .then (() => {
+                    console.log('Tabla creada')
+                })
+                .catch(err => {
+                    console.log(err)
+                })
+            }
+        }
+        catch(err) {
+            console.log(err)
         }
     }
 
-    create(product){
-        const producto = { id: 0, ...product}
-        return this.knex.insert(producto).into(this.table).then()
+    async insertData(data){
+
+        try {
+            await this.createTable()
+            const producto = { id: 0, ...data}
+            return  await this.knex.insert(producto)
+            .insert(this.table)
+            .then(() => {
+                console.log("Producto insertado");
+            })
+        }
+        catch(err) {
+            console.log(err);
+        }
     }
 
-    update(id, producto){
-        return this.knex.from(this.table).where('id', id).update(producto)
+    async update(id, producto){
+        return await this.knex.from(this.table).where('id', id).update(producto)
     }
 
-    getAll(){
-        return this.knex.select('*').table(this.table)    
+    async getContent() {
+        let content;
+
+        await this.createTable();
+        await this.knex.from(this.table).select("*")
+        .then(rows => {
+            content = rows
+        })
+        .catch(err => {
+            console.log(err);
+        });
+        return content;
     }
 
-    deleteById(id){
-        return this.knex.from(this.table).where('id', id).del()
+    async getAll(){
+        let content;
+        try {
+            content = await this.getContent
+        }
+        catch (err){
+            console.log(err);
+        }
+        return content   
+    }
+
+    async save(data) {
+        try {
+
+            await this.getContent(data);
+
+        }
+        catch (error) {
+            console.log("No se pudo agregar el objeto al archivo.");
+            return null;
+        }
+    }
+
+
+    async deleteById(id){
+        return await this.knex.from(this.table).where('id', id).del()
     }
 
 }

@@ -45,15 +45,14 @@ function renderMensajes(data){
 }
 
 
-function addMensaje(){
-    let currentdate = new Date(); 
+function addMensaje(e){
+    let fecha = new Date(); 
     let mensaje = {
         autor: document.getElementById('email').value, 
-        fecha: "["+currentdate.getDate()+"/"+currentdate.getMonth()+"/"+currentdate.getFullYear()+" "+currentdate.getHours()+":"+currentdate.getMinutes()+":"+currentdate.getSeconds()+"]",
+        fecha: "["+fecha.getDate()+"/"+fecha.getMonth()+"/"+fecha.getFullYear()+" "+fecha.getHours()+":"+fecha.getMinutes()+":"+fecha.getSeconds()+"]",
         mensaje: document.getElementById('mensaje').value
     }
     socket.emit('newMensaje', mensaje);
-    document.getElementById('mensaje').mensaje = ' '
-    document.getElementById('mensaje').focus()
+    
     return false;
 }
