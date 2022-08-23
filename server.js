@@ -60,15 +60,19 @@ io.on('connection', (socket) => {
     })
 
     socket.on('nuevoProducto', async (data) => {
+
         const id = await productos.save(data);
         const arr = await productos.getAll();
+        
         const listaProductos = arr;
         io.sockets.emit('listaProductos', listaProductos);
     })
 
     socket.on('nuevoMensaje', async (data) => {
+        
         await mensajes.save(data);
         const arrMsgNuevo = await mensajes.getContent();
+        
         io.sockets.emit('mensaje', arrMsgNuevo);
     });
 })
