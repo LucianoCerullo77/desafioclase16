@@ -16,7 +16,7 @@ class Productos {
                         table.increments('id')
                         table.string('tittle')
                         table.string('descripcion')
-                        table.float('price')
+                        table.integer('price')
                         table.string('foto_url')
                     } else {
                         table.increments('id')
