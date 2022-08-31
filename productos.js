@@ -1,104 +1,110 @@
 
 class Productos {
-    constructor(opcion, table){
-        this.knex = require("knex")(opcion)
-        this.table = table
-        this.createTable();
+    constructor(opcion, tabla) {
+      this.knex = require("knex")(opcion);
+      this.tabla = tabla;
+      this.crearTabla();
     }
 
-    async createTable() {
-        try {
-            if ( await this.knex.schema.hasTable(this.table)) {
-                console.log('La tabla ya existe')
-            } else {
-                await this.knex.schema.createTable(this.table, (table) => {
-                    if (this.table === 'productos') {
-                        table.increments('id')
-                        table.string('tittle')
-                        table.string('descripcion')
-                        table.integer('price')
-                        table.string('foto_url')
-                    } else {
-                        table.increments('id')
-                        table.string('nombre')
-                        table.string('mensaje')
-                    }       
-                })
-                .then (() => {
-                    console.log('Tabla creada')
-                })
-                .catch(err => {
-                    console.log(err)
-                })
-            }
-        }
-        catch(err) {
-            console.log(err)
-        }
-    }
-
-    async insertData(data){
-
-        try {
-            await this.createTable()
-            const producto = { id: 0, ...data}
-            return  await this.knex.insert(producto)
-            .insert(this.table)
-            .then(() => {
-                console.log("Producto insertado");
+    async crearTabla() {
+      try {
+        if (await this.knex.schema.hasTable(this.tabla)) {
+          console.log("La tabla ya existe");
+        } else {
+          await this.knex.schema
+            .createTable(this.tabla, (table) => {
+              if (this.tabla === "productos") {
+                table.increments("id");
+                table.string("tittle");
+                table.string("descripcion");
+                table.integer("price");
+                table.string("foto_url");
+              } else {
+                table.increments("id");
+                table.string("nombre");
+                table.string("mensaje");
+              }
             })
+            .then(() => {
+              console.log(`Tabla ${this.tabla} creada`);
+            })
+            .catch((err) => {
+              console.log(err);
+            });
         }
-        catch(err) {
+      } 
+      catch (err) {
+        console.log(err);
+      }
+    }
+
+    async insertaRegistros(data) {
+      try {
+        await this.crearTabla();
+        await this.knex(this.tabla)
+          .insert(data)
+          .then(() => {
+            console.log("Nuevo registro Insertado");
+          })
+          .catch((err) => {
             console.log(err);
-        }
+          });
+  
+      } catch (err) {
+        console.log(err);
+      }
     }
 
-    async update(id, producto){
-        return await this.knex.from(this.table).where('id', id).update(producto)
-    }
-
-    async getContent() {
-        let content;
-
-        await this.createTable();
-        await this.knex.from(this.table).select("*")
-        .then(rows => {
-            content = rows
+    async obtenerRegistros() {
+      let contenido;
+      await this.crearTabla();
+      await this.knex
+        .from(this.tabla)
+        .select("*")
+        .then((rows) => {
+          contenido = rows;
         })
-        .catch(err => {
-            console.log(err);
+        .catch((err) => {
+          console.log(err);
         });
-        return content;
+      return contenido;
     }
-
-    async getAll(){
-        let content;
-        try {
-            content = await this.getContent
-        }
-        catch (err){
-            console.log(err);
-        }
-        return content   
+  
+    async maximoID() {
+      let contenido = {}
+      await this.knex
+        .from(this.tabla)
+        .select("*")
+        .where("ID", "=", `(SELECT MAX(MX.ID) FROM ${this.tabla} MX)`)
+        .then((rows) => {
+          contenido = rows;
+        })
+        .catch((err) => {
+          console.log(err);
+        });
+      return contenido.id;
     }
-
+  
+    async getAll() {
+      let contenido;
+      try {
+        contenido = await this.obtenerRegistros();
+      } catch (error) {
+        console.log(error);
+      }
+      return contenido;
+    }
+    
+    
     async save(data) {
-        try {
-
-            await this.getContent(data);
-
-        }
-        catch (error) {
-            console.log("No se pudo agregar el objeto al archivo.");
-            return null;
-        }
+      try {
+        await this.insertaRegistros(data);
+        return await this.maximoID();
+      } catch (error) {
+        console.log("No se pudo agregar el objeto al archivo.");
+        return null;
+      }
     }
-
-
-    async deleteById(id){
-        return await this.knex.from(this.table).where('id', id).del()
-    }
-
-}
-
-module.exports = Productos
+  }
+  
+  module.exports = Productos;

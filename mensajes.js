@@ -4,8 +4,14 @@ class Mensajes{
     constructor(config, table){
         this.knex = knex(config)
         this.table = table
+        this.save()
+    }
 
-        this.insertMessage();
+    async createTable(config){
+        const knex = this.knex
+        const tableName = this.table
+        const table = await knex.raw(`CREATE TABLE IF NOT EXISTS ${tableName}`)
+        return table
     }
 
     async insertMessage(mensaje){
@@ -19,9 +25,7 @@ class Mensajes{
 
     async getContent() {
         let content;
-
         await this.createTable();
-
         await this.knex.from(this.table).select("*")
         .then(rows => {
             content = rows
