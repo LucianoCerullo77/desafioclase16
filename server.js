@@ -1,82 +1,44 @@
-const express = require('express')
-const app = express()
-const server = require('http').Server(app)
-const io = require('socket.io')(server)
-const {optionSQLite} = require('./options/sqliteDB')
-const {optionsMDB} = require('./options/mariaDB')
-const Productos = require('./productos.js')
-const Mensajes = require('./mensajes.js')
+const express = require("express");
+const app = express();
+const { Server: HttpServer } = require("http");
+const { Server: IOServer } = require("socket.io");
+const router = require("./routes/router");
+const PORT = process.env.PORT || 8080;
+const { prods } = require("./classes/products");
+const { messages } = require("./classes/messages");
 
-app.use(express.static('public'));
+app.use(express.static(__dirname + "/public"));
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
+app.use("/", router);
+app.set("view engine", "ejs");
 
-const productos = new Productos(optionsMDB, 'productos')
-const mensajes = new Mensajes(optionSQLite, 'mensajes')
+const httpServer = new HttpServer(app);
+const io = new IOServer(httpServer);
 
-let productosDB = []
-let mensajesDB = []
+io.on("connection", async function (socket) {
+  console.log("Un cliente se ha conectado");
+  let products = await prods.getAll();
+  socket.emit("product-load", { products });
 
+  let chat = await messages.getAll();
+  socket.emit("chat-load", { chat });
 
-io.on("connection", function (socket) {
-    console.log("User connected");
-    socket.emit("productos", productosDB);
-    socket.on("newProduct", function (data) {
-      productosDB.push(data);
-      productos.insertaRegistros(data);
-      io.sockets.emit("productos", productosDB);
-    });  
-    socket.on("table", function (data) {
-      productos.crearTabla();
-      productos
-        .getAll()
-        .then((productos) => {
-          productosDB = productos;
-          io.sockets.emit("productos", productosDB);
-        })
-        .catch((err) => {
-          console.log(err);
-        });
-    }),
+  socket.on("new-product", async (product) => {
+    await prods.save(product);
+    products = await prods.getAll();
+    io.sockets.emit("product-load", { products });
+  });
 
+  socket.on("new-message", async (message) => {
+    await messages.save(message);
+    chat = await messages.getAll();
+    io.sockets.emit("chat-load", { chat });
+  });
+});
 
-    // socket.emit('mensajes', mensajesDB)
-    socket.on('newMensaje', async function(data){
-        mensajesDB.push(data)
-        mensajes.insertMessage(data)
-        io.sockets.emit('mensajes', mensajesDB)
-    })
+httpServer.listen(PORT, () => {
+  console.log(`Listening on port number ${PORT}`);
+});
 
-})
-
-server.listen(8080,()=> {
-    console.log('Server running on port 8080') 
-})
-
-io.on('connection', (socket) => {
-    socket.on('nuevoUsuario', async () => {
-
-        const arrMsg = await mensajes.getAll();
-        io.sockets.emit('mensaje', arrMsg);
-
-        const arr = await productos.getAll();
-        const listaProductos = arr;
-
-        io.sockets.emit('listaProductos', listaProductos);
-    })
-
-    socket.on('nuevoProducto', async (data) => {
-
-        const id = await productos.save(data);
-        const arr = await productos.getAll();
-        
-        const listaProductos = arr;
-        io.sockets.emit('listaProductos', listaProductos);
-    })
-
-    socket.on('nuevoMensaje', async (data) => {
-        
-        await mensajes.save(data);
-        const arrMsgNuevo = await mensajes.getContent();
-        
-        io.sockets.emit('mensaje', arrMsgNuevo);
-    });
-})
+httpServer.on("error", (error) => console.log(`Error on the server${error}`));

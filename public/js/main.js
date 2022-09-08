@@ -1,58 +1,82 @@
-let socket = io.connect()
+const socket = io.connect();
 
-socket.on('productos', function(data){
-    renderProductos(data)
-})
+let formSMT = document.getElementById("product-form");
+let chatSMT = document.getElementById("chatbox");
 
-function renderProductos(data){
-    let html = data.map(function(product){
-        return(`<tr>
-                    <td class="fw-normal mb-1">${product.tittle}</td>
-                    <td class="fw-normal mb-1">${product.price}</td>
-                    <td><img src=${product.foto_url} style="width: 50px; height: 50px"></td>
-                </tr>`)
-    }).join('')
-    document.getElementById('table_products').innerHTML=html
+// {{PRODUCT LIST}} client listener
+socket.on("product-load", (products) => {
+  console.log(products);
+  fetch("partials/allProducts.ejs")
+    .then((r) => r.text())
+    .then((partial) => {
+      const template = ejs.compile(partial);
+      const html = template(products);
+      return html;
+    })
+    .then((html) => {
+      document.getElementById("product-list").innerHTML = html;
+    });
+});
 
-}
+// {{CHAT}} client listenerthe
+socket.on("chat-load", (chat) => {
+  console.log(chat);
+  fetch("partials/chatroom.ejs")
+    .then((r) => r.text())
+    .then((partial) => {
+      const template = ejs.compile(partial);
+      const html = template(chat);
+      return html;
+    })
+    .then((html) => {
+      document.getElementById("chatroom").innerHTML = html;
+    });
+});
 
-function addProduct(){
-    let product = {
-        tittle: document.getElementById('tittle').value, 
-        price: document.getElementById('price').value,
-        foto_url: document.getElementById('foto_url').value
-    }
-    socket.emit('newProduct', product)
-    document.getElementById('tittle').value = ''
-    document.getElementById('price').value = ''
-    document.getElementById('foto_url').value = ''
-    document.getElementById('title').focus()
-    return false;
-}
+formSMT.addEventListener("submit", (e) => {
+  e.preventDefault();
+  const product = {
+    title: e.target[0].value,
+    price: e.target[1].value,
+    thumbnail: e.target[2].value,
+    code: e.target[3].value,
+    stock: e.target[4].value,
+    description: e.target[5].value,
+  };
 
-socket.on('mensajes', function(data){
-    renderMensajes(data)
-})
+  socket.emit("new-product", product);
+  e.target[0].value = "";
+  e.target[1].value = "";
+  e.target[2].value = "";
+  e.target[3].value = "";
+  e.target[4].value = "";
+  e.target[5].value = "";
+});
 
-function renderMensajes(data){
-    let html = data.map(function(mensaje, index){
-        return(`<span style="color: #346beb; font-weight: bold;">${mensaje.autor}</span> 
-        <span style="color: #a36f0f;">${mensaje.fecha}</span>
-        :<span style="color: #0d912c; font-style: italic;">${mensaje.mensaje}</span> <br>`)
-    }).join('')
-    document.getElementById('mensajes').innerHTML=html
+chatSMT.addEventListener("submit", (e) => {
+  e.preventDefault();
+  let date = new Date();
+  let dateStr =
+    "(" +
+    ("00" + (date.getMonth() + 1)).slice(-2) +
+    "/" +
+    ("00" + date.getDate()).slice(-2) +
+    "/" +
+    date.getFullYear() +
+    " - " +
+    ("00" + date.getHours()).slice(-2) +
+    ":" +
+    ("00" + date.getMinutes()).slice(-2) +
+    ":" +
+    ("00" + date.getSeconds()).slice(-2) +
+    ")";
+  const message = {
+    email: e.target[0].value,
+    text: e.target[1].value,
+    timestamp: dateStr,
+  };
 
-}
+  socket.emit("new-message", message);
 
-
-function addMensaje(e){
-    let fecha = new Date(); 
-    let mensaje = {
-        autor: document.getElementById('email').value, 
-        fecha: "["+fecha.getDate()+"/"+fecha.getMonth()+"/"+fecha.getFullYear()+" "+fecha.getHours()+":"+fecha.getMinutes()+":"+fecha.getSeconds()+"]",
-        mensaje: document.getElementById('mensaje').value
-    }
-    socket.emit('newMensaje', mensaje);
-    
-    return false;
-}
+  e.target[1].value = "";
+});
